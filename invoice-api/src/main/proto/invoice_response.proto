@@ -1,0 +1,19 @@
+syntax = "proto3";
+option java_multiple_files = true;
+
+package org.salgar.camunda.invoice.response;
+
+import "google/protobuf/any.proto";
+
+message InvoiceResponse {
+  string response = 1;
+  map<string, google.protobuf.Any> payload = 2;
+}
+
+message InvoiceCreated {
+  bool invoice_created = 1;
+}
+
+message InvoiceCancellationSuccessful {
+  bool invoice_cancelation_successful = 1;
+}

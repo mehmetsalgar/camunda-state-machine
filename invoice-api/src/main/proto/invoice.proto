@@ -1,0 +1,40 @@
+syntax = "proto3";
+option java_multiple_files = true;
+import "google/protobuf/any.proto";
+
+package org.salgar.camunda.invoice.model.protobuf;
+
+message OrderItems {
+  repeated OrderItem orderItem = 1;
+}
+
+message Customer {
+  string customerId = 1;
+  string name = 2;
+  string firstName = 3;
+  Address address = 4;
+}
+
+message Address {
+  string street = 1;
+  string houseNo = 2;
+  string city = 3;
+  string plz = 4;
+  string country = 5;
+}
+
+message OrderItem {
+  int64 quantity = 1;
+  Product product = 2;
+}
+
+message Product {
+  string productId = 1;
+  string description = 2;
+  double price = 3;
+}
+
+message BankInformation {
+  string iban = 1;
+  string blz = 2;
+}

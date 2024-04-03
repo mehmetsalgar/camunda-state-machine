@@ -1,0 +1,13 @@
+rootProject.name = 'saga'
+
+include 'customer-api'
+include 'customer-service'
+include 'inventory-api'
+include 'inventory-service'
+include 'invoice-api'
+include 'invoice-service'
+include 'orchestration'
+include 'order-api'
+include 'order-service'
+include 'product-options-api'
+include 'product-options-service'

@@ -1,0 +1,1 @@
+POST http://localhost:60004/invoice/response?correlationId=24c6d006-8f24-4d48-a89f-974f1223ca7b&response=fail

@@ -1,0 +1,18 @@
+{{- if .Values.broker.enabled -}}
+apiVersion: pulsar.streamnative.io/v1alpha1
+kind: PulsarBroker
+metadata:
+  name: brokers
+  namespace: pulsar
+spec:
+  image: "apachepulsar/pulsar-all@sha256:bcd07cb37874e9364d2660111771148327896a4a788de4d8750a7d78ac9b50a3"
+  pod:
+    resources:
+      requests:
+        cpu: 200m
+        memory: 512Mi
+    securityContext:
+      runAsNonRoot: true
+  replicas: 2
+  zkServers: zookeepers-zk:2181
+{{- end -}}

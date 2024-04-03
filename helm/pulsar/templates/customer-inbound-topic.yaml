@@ -1,0 +1,11 @@
+{{- if .Values.resources.enabled -}}
+apiVersion: resource.streamnative.io/v1alpha1
+kind: PulsarTopic
+metadata:
+  name: {{ .Release.Namespace }}-pulsar-customer-inbound-topic
+  namespace: pulsar
+spec:
+  name: persistent://sagatenant/sagans/customerInboundTopic
+  connectionRef:
+    name: {{ .Release.Namespace }}-pulsar-connection
+{{- end -}}

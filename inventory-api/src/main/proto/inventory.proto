@@ -1,0 +1,20 @@
+syntax = "proto3";
+option java_multiple_files = true;
+import "google/protobuf/any.proto";
+
+package org.salgar.camunda.inventory.model.protobuf;
+
+message OrderItems {
+  repeated OrderItem orderItem = 1;
+}
+
+message OrderItem {
+  int64 quantity = 1;
+  Product product = 2;
+}
+
+message Product {
+  string productId = 1;
+  string description = 2;
+  double price = 3;
+}

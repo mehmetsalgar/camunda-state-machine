@@ -1,0 +1,29 @@
+spring.application.name: "order-service"
+
+management:
+  endpoint:
+    health:
+      enabled: true
+  endpoints:
+    web:
+      exposure:
+        include: "*"
+
+spring:
+  pulsar:
+    client:
+      service-url: "pulsar://proxys-proxy.pulsar:6650"
+    defaults:
+      type-mappings:
+        - message-type: org.salgar.camunda.order.command.OrderCommand
+          schema-info:
+            schema-type: PROTOBUF
+        - message-type: org.salgar.camunda.order.response.OrderResponse
+          schema-info:
+            schema-type: PROTOBUF
+    consumer:
+      order:
+        topics: "persistent://sagatenant/sagans/orderInboundTopic"
+    producer:
+      order:
+        topic-name: "persistent://sagatenant/sagans/orderOutboundTopic"

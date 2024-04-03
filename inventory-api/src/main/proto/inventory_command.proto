@@ -1,0 +1,11 @@
+syntax = "proto3";
+option java_multiple_files = true;
+
+package org.salgar.camunda.inventory.command;
+
+import "google/protobuf/any.proto";
+
+message InventoryCommand {
+  string command = 1;
+  map<string, google.protobuf.Any> payload = 2;
+}

@@ -1,0 +1,29 @@
+spring.application.name: "customer-service"
+
+management:
+  endpoint:
+    health:
+      enabled: true
+  endpoints:
+    web:
+      exposure:
+        include: "*"
+
+spring:
+  pulsar:
+    client:
+      service-url: "pulsar://proxys-proxy.pulsar:6650"
+    defaults:
+      type-mappings:
+        - message-type: org.salgar.camunda.customer.command.CustomerCommand
+          schema-info:
+            schema-type: PROTOBUF
+        - message-type: org.salgar.camunda.customer.response.CustomerResponse
+          schema-info:
+            schema-type: PROTOBUF
+    consumer:
+      customer:
+        topics: "persistent://sagatenant/sagans/customerInboundTopic"
+    producer:
+      customer:
+        topic-name: "persistent://sagatenant/sagans/customerOutboundTopic"

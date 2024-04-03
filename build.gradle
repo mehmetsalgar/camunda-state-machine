@@ -1,0 +1,545 @@
+buildscript {
+    repositories {
+        mavenCentral()
+        mavenLocal()
+        maven { url "https://repo.spring.io/snapshot" }
+        maven { url "https://repo.spring.io/milestone" }
+        maven { url "https://plugins.gradle.org/m2/"}
+        maven { url "https://oss.sonatype.org/content/repositories/snapshots"}
+    }
+
+    dependencies {
+        classpath "org.springframework.boot:spring-boot-gradle-plugin:3.2.3"
+    }
+}
+
+plugins {
+    id 'java'
+    id 'java-library'
+    id 'org.springframework.boot' version '3.2.3'
+    id 'io.spring.dependency-management' version '1.1.4'
+    id 'com.google.cloud.tools.jib' version '3.3.2'
+    id 'com.google.protobuf' version '0.8.19'
+}
+
+allprojects {
+    apply plugin: 'io.spring.dependency-management'
+
+    dependencyManagement {
+        imports {
+            mavenBom org.springframework.boot.gradle.plugin.SpringBootPlugin.BOM_COORDINATES
+        }
+    }
+
+    group = 'org.salgar.camunda'
+
+    java {
+        sourceCompatibility = '17'
+    }
+
+
+    repositories {
+        maven { url "https://repo.spring.io/snapshot" }
+        maven { url "https://repo.spring.io/milestone" }
+        mavenLocal()
+        mavenCentral()
+    }
+
+    bootJar {
+        enabled = false
+    }
+}
+
+subprojects {
+    ext {
+        flag = true
+    }
+
+    if(ext.flag) {
+        ext.props = [
+                DOCKER_HUB_USER: property('DOCKER_HUB_USER'),
+                DOCKER_HUB_PASSWORD: property('DOCKER_HUB_PASSWORD'),
+                DOCKER_URL: property('DOCKER_URL'),
+                DOCKER_USER: property('DOCKER_USER'),
+                DOCKER_PASSWORD: property('DOCKER_PASSWORD')
+        ]
+    }
+}
+
+project('customer-api') {
+    apply plugin: 'java'
+    apply plugin: 'java-library'
+    apply plugin: 'com.google.protobuf'
+
+    version = '0.0.1-SNAPSHOT'
+
+    dependencies {
+        implementation 'com.google.protobuf:protobuf-java:3.19.4'
+        compileOnly('org.projectlombok:lombok')
+        annotationProcessor('org.projectlombok:lombok')
+
+
+        testCompileOnly('org.projectlombok:lombok')
+        testAnnotationProcessor('org.projectlombok:lombok')
+    }
+
+    protobuf {
+        generatedFilesBaseDir = "$projectDir/build/generated-sources"
+        protoc {
+            // You still need protoc like in the non-Android case
+            artifact = 'com.google.protobuf:protoc:3.19.4'
+        }
+    }
+
+    clean {
+        delete protobuf.generatedFilesBaseDir
+    }
+
+    tasks.named('test') {
+        useJUnitPlatform()
+    }
+}
+
+project('customer-service') {
+    apply plugin: 'java'
+    apply plugin: 'java-library'
+    apply plugin: 'com.google.cloud.tools.jib'
+
+    version = '0.0.8-SNAPSHOT'
+
+    dependencies {
+        implementation project(':customer-api')
+        implementation 'org.springframework.boot:spring-boot-starter-webflux'
+        implementation 'org.springframework.boot:spring-boot-starter-actuator'
+        implementation 'org.springframework.boot:spring-boot-starter-pulsar'
+        compileOnly('org.projectlombok:lombok')
+        annotationProcessor('org.projectlombok:lombok')
+
+        testImplementation 'org.springframework.boot:spring-boot-starter-test'
+        testImplementation 'io.projectreactor:reactor-test'
+        testCompileOnly('org.projectlombok:lombok')
+        testAnnotationProcessor('org.projectlombok:lombok')
+    }
+
+    tasks.named('test') {
+        useJUnitPlatform()
+    }
+
+    jib {
+        from {
+            image = 'azul/zulu-openjdk:17.0.2-17.32.13'
+            auth {
+                username = "${props.DOCKER_HUB_USER}"
+                password = "${props.DOCKER_HUB_PASSWORD}"
+            }
+        }
+        to {
+            image = "fsm-akka.registry:5555/saga/${project.name}"
+            tags = ["${project.version}"]
+            auth {
+                username = "${props.DOCKER_USER}"
+                //password = file("/tmp/${props.CI_PIPELINE_ID}.json").text
+                password = "${props.DOCKER_PASSWORD}"
+            }
+        }
+        allowInsecureRegistries = true
+
+    }
+    tasks.build.dependsOn tasks.jib
+}
+
+project('inventory-api') {
+    apply plugin: 'java'
+    apply plugin: 'java-library'
+    apply plugin: 'com.google.protobuf'
+
+    version = '0.0.1-SNAPSHOT'
+
+    dependencies {
+        implementation 'com.google.protobuf:protobuf-java:3.19.4'
+        compileOnly('org.projectlombok:lombok')
+        annotationProcessor('org.projectlombok:lombok')
+
+
+        testCompileOnly('org.projectlombok:lombok')
+        testAnnotationProcessor('org.projectlombok:lombok')
+    }
+
+    protobuf {
+        generatedFilesBaseDir = "$projectDir/build/generated-sources"
+        protoc {
+            // You still need protoc like in the non-Android case
+            artifact = 'com.google.protobuf:protoc:3.19.4'
+        }
+    }
+
+    clean {
+        delete protobuf.generatedFilesBaseDir
+    }
+
+    tasks.named('test') {
+        useJUnitPlatform()
+    }
+}
+
+project('inventory-service') {
+    apply plugin: 'java'
+    apply plugin: 'java-library'
+    apply plugin: 'com.google.cloud.tools.jib'
+
+    version = '0.0.4-SNAPSHOT'
+
+    dependencies {
+        implementation project(':inventory-api')
+        implementation 'org.springframework.boot:spring-boot-starter-webflux'
+        implementation 'org.springframework.boot:spring-boot-starter-actuator'
+        implementation 'org.springframework.boot:spring-boot-starter-pulsar'
+        compileOnly('org.projectlombok:lombok')
+        annotationProcessor('org.projectlombok:lombok')
+
+        testImplementation 'org.springframework.boot:spring-boot-starter-test'
+        testImplementation 'io.projectreactor:reactor-test'
+        testCompileOnly('org.projectlombok:lombok')
+        testAnnotationProcessor('org.projectlombok:lombok')
+    }
+
+    tasks.named('test') {
+        useJUnitPlatform()
+    }
+
+    jib {
+        from {
+            image = 'azul/zulu-openjdk:17.0.2-17.32.13'
+            auth {
+                username = "${props.DOCKER_HUB_USER}"
+                password = "${props.DOCKER_HUB_PASSWORD}"
+            }
+        }
+        to {
+            image = "fsm-akka.registry:5555/saga/${project.name}"
+            tags = ["${project.version}"]
+            auth {
+                username = "${props.DOCKER_USER}"
+                //password = file("/tmp/${props.CI_PIPELINE_ID}.json").text
+                password = "${props.DOCKER_PASSWORD}"
+            }
+        }
+        allowInsecureRegistries = true
+
+    }
+    tasks.build.dependsOn tasks.jib
+}
+
+project('invoice-api') {
+    apply plugin: 'java'
+    apply plugin: 'java-library'
+    apply plugin: 'com.google.protobuf'
+
+    version = '0.0.1-SNAPSHOT'
+
+    dependencies {
+        implementation 'com.google.protobuf:protobuf-java:3.19.4'
+        compileOnly('org.projectlombok:lombok')
+        annotationProcessor('org.projectlombok:lombok')
+
+
+        testCompileOnly('org.projectlombok:lombok')
+        testAnnotationProcessor('org.projectlombok:lombok')
+    }
+
+    protobuf {
+        generatedFilesBaseDir = "$projectDir/build/generated-sources"
+        protoc {
+            // You still need protoc like in the non-Android case
+            artifact = 'com.google.protobuf:protoc:3.19.4'
+        }
+    }
+
+    clean {
+        delete protobuf.generatedFilesBaseDir
+    }
+
+    tasks.named('test') {
+        useJUnitPlatform()
+    }
+}
+
+project('invoice-service') {
+    apply plugin: 'java'
+    apply plugin: 'java-library'
+    apply plugin: 'com.google.cloud.tools.jib'
+
+    version = '0.0.4-SNAPSHOT'
+
+    dependencies {
+        implementation project(':invoice-api')
+        implementation 'org.springframework.boot:spring-boot-starter-webflux'
+        implementation 'org.springframework.boot:spring-boot-starter-actuator'
+        implementation 'org.springframework.boot:spring-boot-starter-pulsar'
+        compileOnly('org.projectlombok:lombok')
+        annotationProcessor('org.projectlombok:lombok')
+
+        testImplementation 'org.springframework.boot:spring-boot-starter-test'
+        testImplementation 'io.projectreactor:reactor-test'
+        testCompileOnly('org.projectlombok:lombok')
+        testAnnotationProcessor('org.projectlombok:lombok')
+    }
+
+    tasks.named('test') {
+        useJUnitPlatform()
+    }
+
+    jib {
+        from {
+            image = 'azul/zulu-openjdk:17.0.2-17.32.13'
+            auth {
+                username = "${props.DOCKER_HUB_USER}"
+                password = "${props.DOCKER_HUB_PASSWORD}"
+            }
+        }
+        to {
+            image = "fsm-akka.registry:5555/saga/${project.name}"
+            tags = ["${project.version}"]
+            auth {
+                username = "${props.DOCKER_USER}"
+                //password = file("/tmp/${props.CI_PIPELINE_ID}.json").text
+                password = "${props.DOCKER_PASSWORD}"
+            }
+        }
+        allowInsecureRegistries = true
+
+    }
+    tasks.build.dependsOn tasks.jib
+}
+
+project(':orchestration') {
+    apply plugin: 'java'
+    apply plugin: 'java-library'
+    apply plugin: 'com.google.cloud.tools.jib'
+
+    version = '0.0.36-SNAPSHOT'
+
+    dependencies {
+        implementation project(':order-api'),
+                project(':customer-api'),
+                project(':product-options-api'),
+                project(':inventory-api'),
+                project(':invoice-api')
+        implementation 'org.springframework.boot:spring-boot-starter-webflux'
+        implementation 'org.springframework.boot:spring-boot-starter-actuator'
+        implementation 'io.camunda:spring-zeebe-starter:8.4.0'
+        api 'org.apache.pulsar:pulsar-client:3.0.0'
+        implementation 'com.fasterxml.jackson.core:jackson-databind'
+
+        implementation 'org.mapstruct:mapstruct:1.5.5.Final'
+        compileOnly 'org.projectlombok:lombok'
+        annotationProcessor 'org.projectlombok:lombok'
+        annotationProcessor 'org.mapstruct:mapstruct-processor:1.5.5.Final'
+        annotationProcessor 'no.entur.mapstruct.spi:protobuf-spi-impl:1.44'
+
+        testImplementation 'org.springframework.boot:spring-boot-starter-test'
+        testImplementation 'io.projectreactor:reactor-test'
+        testCompileOnly 'org.projectlombok:lombok'
+        testAnnotationProcessor 'org.projectlombok:lombok'
+    }
+
+    tasks.named('compileJava').configure {
+        options.compilerArgs = ['-parameters']
+    }
+
+    tasks.named('test') {
+        useJUnitPlatform()
+    }
+
+    jib {
+        container {
+            [
+                    '--add-opens', 'java.base/java.lang=ALL-UNNAMED',
+                    '--add-opens', 'java.base/java.util=ALL-UNNAMED',
+                    '--add-opens', 'java.base/sun.net=ALL-UNNAMED'
+            ]
+        }
+        from {
+            image = 'azul/zulu-openjdk:17.0.2-17.32.13'
+            auth {
+                username = "${props.DOCKER_HUB_USER}"
+                password = "${props.DOCKER_HUB_PASSWORD}"
+            }
+        }
+        to {
+            image = "fsm-akka.registry:5555/saga/${project.name}"
+            tags = ["${project.version}"]
+            auth {
+                username = "${props.DOCKER_USER}"
+                //password = file("/tmp/${props.CI_PIPELINE_ID}.json").text
+                password = "${props.DOCKER_PASSWORD}"
+            }
+        }
+        allowInsecureRegistries = true
+    }
+    tasks.build.dependsOn tasks.jib
+}
+
+project('order-api') {
+    apply plugin: 'java'
+    apply plugin: 'java-library'
+    apply plugin: 'com.google.protobuf'
+
+    version = '0.0.1-SNAPSHOT'
+
+    dependencies {
+        implementation 'com.google.protobuf:protobuf-java:3.19.4'
+        compileOnly('org.projectlombok:lombok')
+        annotationProcessor('org.projectlombok:lombok')
+
+
+        testCompileOnly('org.projectlombok:lombok')
+        testAnnotationProcessor('org.projectlombok:lombok')
+    }
+
+    protobuf {
+        generatedFilesBaseDir = "$projectDir/build/generated-sources"
+        protoc {
+            // You still need protoc like in the non-Android case
+            artifact = 'com.google.protobuf:protoc:3.19.4'
+        }
+    }
+
+    clean {
+        delete protobuf.generatedFilesBaseDir
+    }
+
+    tasks.named('test') {
+        useJUnitPlatform()
+    }
+}
+
+project('order-service') {
+    apply plugin: 'java'
+    apply plugin: 'java-library'
+    apply plugin: 'com.google.cloud.tools.jib'
+
+    version = '0.0.7-SNAPSHOT'
+
+    dependencies {
+        implementation project(':order-api')
+        implementation 'org.springframework.boot:spring-boot-starter-webflux'
+        implementation 'org.springframework.boot:spring-boot-starter-actuator'
+        implementation 'org.springframework.boot:spring-boot-starter-pulsar'
+        compileOnly('org.projectlombok:lombok')
+        annotationProcessor('org.projectlombok:lombok')
+
+        testImplementation 'org.springframework.boot:spring-boot-starter-test'
+        testImplementation 'io.projectreactor:reactor-test'
+        testCompileOnly('org.projectlombok:lombok')
+        testAnnotationProcessor('org.projectlombok:lombok')
+    }
+
+    tasks.named('test') {
+        useJUnitPlatform()
+    }
+
+    jib {
+        from {
+            image = 'azul/zulu-openjdk:17.0.2-17.32.13'
+            auth {
+                username = "${props.DOCKER_HUB_USER}"
+                password = "${props.DOCKER_HUB_PASSWORD}"
+            }
+        }
+        to {
+            image = "fsm-akka.registry:5555/saga/${project.name}"
+            tags = ["${project.version}"]
+            auth {
+                username = "${props.DOCKER_USER}"
+                //password = file("/tmp/${props.CI_PIPELINE_ID}.json").text
+                password = "${props.DOCKER_PASSWORD}"
+            }
+        }
+        allowInsecureRegistries = true
+
+    }
+    tasks.build.dependsOn tasks.jib
+}
+
+project('product-options-api') {
+    apply plugin: 'java'
+    apply plugin: 'java-library'
+    apply plugin: 'com.google.protobuf'
+
+    version = '0.0.1-SNAPSHOT'
+
+    dependencies {
+        implementation 'com.google.protobuf:protobuf-java:3.19.4'
+        compileOnly('org.projectlombok:lombok')
+        annotationProcessor('org.projectlombok:lombok')
+
+
+        testCompileOnly('org.projectlombok:lombok')
+        testAnnotationProcessor('org.projectlombok:lombok')
+    }
+
+    protobuf {
+        generatedFilesBaseDir = "$projectDir/build/generated-sources"
+        protoc {
+            // You still need protoc like in the non-Android case
+            artifact = 'com.google.protobuf:protoc:3.19.4'
+        }
+    }
+
+    clean {
+        delete protobuf.generatedFilesBaseDir
+    }
+
+    tasks.named('test') {
+        useJUnitPlatform()
+    }
+}
+
+project('product-options-service') {
+    apply plugin: 'java'
+    apply plugin: 'java-library'
+    apply plugin: 'com.google.cloud.tools.jib'
+
+    version = '0.0.3-SNAPSHOT'
+
+    dependencies {
+        implementation project(':product-options-api')
+        implementation 'org.springframework.boot:spring-boot-starter-webflux'
+        implementation 'org.springframework.boot:spring-boot-starter-actuator'
+        implementation 'org.springframework.boot:spring-boot-starter-pulsar'
+        compileOnly('org.projectlombok:lombok')
+        annotationProcessor('org.projectlombok:lombok')
+
+        testImplementation 'org.springframework.boot:spring-boot-starter-test'
+        testImplementation 'io.projectreactor:reactor-test'
+        testCompileOnly('org.projectlombok:lombok')
+        testAnnotationProcessor('org.projectlombok:lombok')
+    }
+
+    tasks.named('test') {
+        useJUnitPlatform()
+    }
+
+    jib {
+        from {
+            image = 'azul/zulu-openjdk:17.0.2-17.32.13'
+            auth {
+                username = "${props.DOCKER_HUB_USER}"
+                password = "${props.DOCKER_HUB_PASSWORD}"
+            }
+        }
+        to {
+            image = "fsm-akka.registry:5555/saga/${project.name}"
+            tags = ["${project.version}"]
+            auth {
+                username = "${props.DOCKER_USER}"
+                //password = file("/tmp/${props.CI_PIPELINE_ID}.json").text
+                password = "${props.DOCKER_PASSWORD}"
+            }
+        }
+        allowInsecureRegistries = true
+
+    }
+    tasks.build.dependsOn tasks.jib
+}

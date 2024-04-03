@@ -1,0 +1,12 @@
+bookie:
+  enabled: false
+broker:
+  enabled: false
+proxy:
+  enabled: false
+zookeeper:
+  enabled: false
+connection:
+  enabled: false
+resources:
+  enabled: false

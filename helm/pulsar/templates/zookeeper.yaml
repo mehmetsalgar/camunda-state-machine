@@ -1,0 +1,31 @@
+{{- if .Values.zookeeper.enabled -}}
+apiVersion: zookeeper.streamnative.io/v1alpha1
+kind: ZooKeeperCluster
+metadata:
+  name: zookeepers
+  namespace: pulsar
+spec:
+  image: "apachepulsar/pulsar-all@sha256:bcd07cb37874e9364d2660111771148327896a4a788de4d8750a7d78ac9b50a3"
+  pod:
+    resources:
+      requests:
+        cpu: 50m
+        memory: 256Mi
+    securityContext:
+      runAsNonRoot: true
+  persistence:
+    data:
+      accessModes:
+        - ReadWriteOnce
+      resources:
+        requests:
+          storage: 8Gi
+    dataLog:
+      accessModes:
+        - ReadWriteOnce
+      resources:
+        requests:
+          storage: 2Gi
+    reclaimPolicy: Delete
+  replicas: 3
+{{- end -}}

@@ -1,0 +1,1 @@
+POST http://localhost:60001/customer/response?correlationId=b78ff7e4-91dc-4cce-8208-6042f041bcb5&response=revert

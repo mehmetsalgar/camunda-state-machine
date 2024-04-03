@@ -1,0 +1,11 @@
+syntax = "proto3";
+option java_multiple_files = true;
+
+package org.salgar.camunda.order.command;
+
+import "google/protobuf/any.proto";
+
+message OrderCommand {
+  string command = 1;
+  map<string, google.protobuf.Any> payload = 2;
+}

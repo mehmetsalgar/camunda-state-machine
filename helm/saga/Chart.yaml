@@ -1,0 +1,25 @@
+apiVersion: v2
+name: saga
+description: A Helm chart for Kubernetes
+type: application
+version: 0.1.0
+appVersion: "1.16.0"
+dependencies:
+  - name: customer-service
+    version: 0.1.0
+    condition: customer-service.enabled
+  - name: inventory-service
+    version: 0.1.0
+    condition: inventory-service.enabled
+  - name: invoice-service
+    version: 0.1.0
+    condition: invoice-service.enabled
+  - name: orchestration
+    version: 0.1.0
+    condition: orchestration.enabled
+  - name: order-service
+    version: 0.1.0
+    condition: order-service.enabled
+  - name: product-options-service
+    version: 0.1.0
+    condition: production-options-service

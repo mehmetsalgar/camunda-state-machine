@@ -1,0 +1,1 @@
+POST http://localhost:60004/invoice/response?correlationId=ace3cd44-a5ca-4494-9a38-909f5406f592&response=cancel

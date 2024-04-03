@@ -1,0 +1,55 @@
+camunda-platform:
+  global:
+    identity:
+      auth:
+        enabled: false
+
+  identity:
+    enabled: false
+    resources:
+      limits:
+        cpu: "1"
+      requests:
+        cpu: "0.2"
+
+  optimize:
+    enabled: false
+    resources:
+      limits:
+        cpu: "1"
+      requests:
+        cpu: "0.2"
+
+  zeebe:
+    clusterSize: 1
+    partitionCount: 1
+    replicationFactor: 1
+    pvcSize: 10Gi
+    resources:
+      requests:
+        cpu: "0.2"
+
+  zeebe-gateway:
+    replicas: 1
+    resources:
+      limits:
+        cpu: "1"
+      requests:
+        cpu: "0.2"
+
+  connectors:
+    enabled: true
+    inbound:
+      mode: disabled
+    resources:
+      limits:
+        cpu: "1"
+      requests:
+        cpu: "0.2"
+
+  elasticsearch:
+    clusterHealthCheckParams: "wait_for_status=yellow&timeout=1s"
+    master:
+      replicaCount: 1
+      persistence:
+        size: 15Gi

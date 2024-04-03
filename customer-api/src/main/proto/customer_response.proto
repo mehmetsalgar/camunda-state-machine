@@ -1,0 +1,19 @@
+syntax = "proto3";
+option java_multiple_files = true;
+
+package org.salgar.camunda.customer.response;
+
+import "google/protobuf/any.proto";
+
+message CustomerResponse {
+  string response = 1;
+  map<string, google.protobuf.Any> payload = 2;
+}
+
+message CustomerCreated {
+  bool customer_created = 1;
+}
+
+message CustomerRevertSuccessful {
+  bool customer_revert_sucessful = 1;
+}

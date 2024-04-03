@@ -1,0 +1,29 @@
+spring.application.name: "product-options-service"
+
+management:
+  endpoint:
+    health:
+      enabled: true
+  endpoints:
+    web:
+      exposure:
+        include: "*"
+
+spring:
+  pulsar:
+    client:
+      service-url: "pulsar://proxys-proxy.pulsar:6650"
+    defaults:
+      type-mappings:
+        - message-type: org.salgar.camunda.product.options.command.ProductOptionsCommand
+          schema-info:
+            schema-type: PROTOBUF
+        - message-type: org.salgar.camunda.product.options.response.ProductOptionsResponse
+          schema-info:
+            schema-type: PROTOBUF
+    consumer:
+      product-options:
+        topics: "persistent://sagatenant/sagans/productOptionsInboundTopic"
+    producer:
+      product-options:
+        topic-name: "persistent://sagatenant/sagans/productOptionsOutboundTopic"

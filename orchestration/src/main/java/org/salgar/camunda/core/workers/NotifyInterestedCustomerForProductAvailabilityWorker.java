@@ -1,0 +1,28 @@
+package org.salgar.camunda.core.workers;
+
+import io.camunda.zeebe.client.api.response.ActivatedJob;
+import io.camunda.zeebe.spring.client.annotation.JobWorker;
+import lombok.RequiredArgsConstructor;
+import lombok.extern.slf4j.Slf4j;
+import org.salgar.camunda.order.util.PayloadVariableConstants;
+import org.salgar.camunda.port.InventoryOutboundPort;
+import org.springframework.stereotype.Component;
+
+import java.util.Map;
+
+@Component
+@RequiredArgsConstructor
+@Slf4j
+public class NotifyInterestedCustomerForProductAvailabilityWorker {
+    private final InventoryOutboundPort inventoryOutboundPort;
+
+    @JobWorker(type = "notifyInterestedCustomerProductAvailability")
+    public void notifyInterestedCustomerProductAvailability(final ActivatedJob job) {
+        log.info("Notifying Interested Customers for Product Availability");
+
+        Map<String, Object> existingVariables = job.getVariablesAsMap();
+        String orderId = (String) existingVariables.get(PayloadVariableConstants.ORDER_ID_VARIABLE);
+
+        inventoryOutboundPort.notifyInterestedCustomer(orderId);
+    }
+}

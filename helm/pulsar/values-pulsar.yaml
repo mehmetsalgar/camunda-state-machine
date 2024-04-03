@@ -1,0 +1,8 @@
+bookie:
+  enabled: true
+broker:
+  enabled: true
+proxy:
+  enabled: true
+zookeeper:
+  enabled: true

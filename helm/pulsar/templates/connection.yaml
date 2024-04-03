@@ -1,0 +1,9 @@
+{{- if .Values.connection.enabled -}}
+apiVersion: resource.streamnative.io/v1alpha1
+kind: PulsarConnection
+metadata:
+  name: {{ .Release.Namespace }}-pulsar-connection
+  namespace: {{ .Release.Namespace }}
+spec:
+  adminServiceURL: "http://proxys-proxy.pulsar.svc.cluster.local:8080"
+{{- end -}}

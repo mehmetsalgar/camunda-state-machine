@@ -1,0 +1,54 @@
+spring.application.name: "saga"
+
+management:
+  endpoint:
+    health:
+      enabled: true
+  endpoints:
+    web:
+      exposure:
+        include: "*"
+
+spring:
+  pulsar:
+    client:
+      service-url: "pulsar://proxys-proxy.pulsar:6650"
+    producer:
+      customer:
+        topic-name: "persistent://sagatenant/sagans/customerInboundTopic"
+      inventory:
+        topic-name: "persistent://sagatenant/sagans/inventoryInboundTopic"
+      invoice:
+        topic-name: "persistent://sagatenant/sagans/invoiceInboundTopic"
+      order:
+        topic-name: "persistent://sagatenant/sagans/orderInboundTopic"
+      product-options:
+        topic-name: "persistent://sagatenant/sagans/productOptionsInboundTopic"
+    consumer:
+      customer:
+        topics: "persistent://sagatenant/sagans/customerOutboundTopic"
+        subscription:
+          name: "orchestration-customer"
+      inventory:
+        topics: "persistent://sagatenant/sagans/inventoryOutboundTopic"
+        subscription:
+          name: "orchestration-inventory"
+      invoice:
+        topics: "persistent://sagatenant/sagans/invoiceOutboundTopic"
+        subscription:
+          name: "orchestration-invoice"
+      order:
+        topics: "persistent://sagatenant/sagans/orderOutboundTopic"
+        subscription:
+          name: "orchestration-order"
+      product-options:
+        topics: "persistent://sagatenant/sagans/productOptionsOutboundTopic"
+        subscription:
+          name: "orchestration-product-options"
+
+zeebe:
+  client:
+    security:
+      plaintext: "true"
+    broker:
+      gateway-address: "camunda-platform-zeebe-gateway.camunda:26500"

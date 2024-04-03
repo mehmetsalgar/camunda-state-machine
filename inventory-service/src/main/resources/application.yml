@@ -1,0 +1,29 @@
+spring.application.name: "inventory-service"
+
+management:
+  endpoint:
+    health:
+      enabled: true
+  endpoints:
+    web:
+      exposure:
+        include: "*"
+
+spring:
+  pulsar:
+    client:
+      service-url: "pulsar://proxys-proxy.pulsar:6650"
+    defaults:
+      type-mappings:
+        - message-type: org.salgar.camunda.inventory.command.InventoryCommand
+          schema-info:
+            schema-type: PROTOBUF
+        - message-type: org.salgar.camunda.inventory.response.InventoryResponse
+          schema-info:
+            schema-type: PROTOBUF
+    consumer:
+      inventory:
+        topics: "persistent://sagatenant/sagans/inventoryInboundTopic"
+    producer:
+      inventory:
+        topic-name: "persistent://sagatenant/sagans/inventoryOutboundTopic"

@@ -1,0 +1,29 @@
+{{- if .Values.proxy.enabled -}}
+apiVersion: pulsar.streamnative.io/v1alpha1
+kind: PulsarProxy
+metadata:
+  name: proxys
+  namespace: pulsar
+spec:
+  image: "apachepulsar/pulsar-all@sha256:bcd07cb37874e9364d2660111771148327896a4a788de4d8750a7d78ac9b50a3"
+  pod:
+    resources:
+      requests:
+        cpu: 200m
+        memory: 512Mi
+    securityContext:
+      runAsNonRoot: true
+  brokerAddress: brokers-broker
+  replicas: 2
+  config:
+    custom:
+      authorizationEnabled: "false"
+      PULSAR_PREFIX_webSocketServiceEnabled: "true"
+    tls:
+      enabled: false
+  webSocketServiceEnabled: false
+  dnsNames:
+    []
+  issuerRef:
+    name: ""
+{{- end -}}
