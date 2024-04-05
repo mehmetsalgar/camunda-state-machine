@@ -6,6 +6,6 @@ import java.util.List;
 
 public interface InventoryOutboundPort {
     void reserveProductInInventory(String correlationId, List<OrderItem> orderItems);
-    void revertProductReservation(String correlationId, List<OrderItem> orderItems);
+    void revertProductReservation(String correlationId, List<OrderItem> orderItems, String sourceProcess);
     void notifyInterestedCustomer(String correlationId);
 }

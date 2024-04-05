@@ -13,6 +13,7 @@ public abstract class AbstractInboundAdapter {
             String correlationId,
             String zeebeMessage,
             Map<String, Object> variables) {
+
         zeebeClient
                 .newPublishMessageCommand()
                 .messageName(zeebeMessage)

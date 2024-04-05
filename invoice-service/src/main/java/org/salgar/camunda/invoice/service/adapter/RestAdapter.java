@@ -3,12 +3,14 @@ package org.salgar.camunda.invoice.service.adapter;
 import com.google.protobuf.Any;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
+import org.salgar.camunda.invoice.command.SourceProcess;
 import org.salgar.camunda.invoice.response.InvoiceCancellationSuccessful;
 import org.salgar.camunda.invoice.response.InvoiceCreated;
 import org.salgar.camunda.invoice.response.InvoiceResponse;
 import org.salgar.camunda.invoice.service.port.RestPort;
 import org.salgar.camunda.invoice.utils.PayloadVariableConstants;
 import org.salgar.camunda.invoice.utils.ResponseConstants;
+import org.salgar.camunda.invoice.utils.SourceProcessConstants;
 import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.RestController;
 import org.springframework.web.server.ServerWebExchange;
@@ -29,14 +31,19 @@ public class RestAdapter implements RestPort {
 
         String response = exchange.getRequest().getQueryParams().getFirst("response");
         if (response == null) {
-            correlationId = "";
+            response = "";
         }
-        processInvoiceResponse(correlationId, response);
+
+        String sourceProcess = exchange.getRequest().getQueryParams().getFirst("sourceProcess");
+        if (sourceProcess == null) {
+            sourceProcess = "";
+        }
+        processInvoiceResponse(correlationId, response, sourceProcess);
     }
 
     @Override
-    public void processInvoiceResponse(String correlationId, String response) {
-        String customerResponse = null;
+    public void processInvoiceResponse(String correlationId, String response, String sourceProcess) {
+        String customerResponse;
         if("create".equals(response)) {
             customerResponse = ResponseConstants.INVOICE_CREATED;
             prepareInvoiceCreated(correlationId, customerResponse);
@@ -45,7 +52,7 @@ public class RestAdapter implements RestPort {
             prepareInvoiceFailed(correlationId, customerResponse);
         } else if("cancel".equals(response)) {
             customerResponse = ResponseConstants.INVOICE_CANCELED;
-            prepareInvoiceCanceled(correlationId, customerResponse);
+            prepareInvoiceCanceled(correlationId, customerResponse, sourceProcess);
         } else {
             log.info("Unknown response: [{}]", response);
         }
@@ -73,13 +80,17 @@ public class RestAdapter implements RestPort {
         invoiceOutboundAdapter.deliverInvoiceResponse(correlationId, builder.build());
     }
 
-    private void prepareInvoiceCanceled(String correlationId, String invoiceResponse) {
+    private void prepareInvoiceCanceled(String correlationId, String invoiceResponse, String sourceProcess) {
         InvoiceResponse.Builder builder = InvoiceResponse.newBuilder();
         builder.setResponse(invoiceResponse);
         builder.putPayload(
                 PayloadVariableConstants.INVOICE_CANCELLATION_SUCCESSFUL,
                 Any.pack(InvoiceCancellationSuccessful.newBuilder().setInvoiceCancelationSuccessful(true).build())
-        );
+        )
+                .putPayload(
+                        SourceProcessConstants.SOURCE_PROCESS,
+                        Any.pack(SourceProcess.newBuilder().setSourceProcess(sourceProcess).build())
+                );
 
         invoiceOutboundAdapter.deliverInvoiceResponse(correlationId, builder.build());
     }

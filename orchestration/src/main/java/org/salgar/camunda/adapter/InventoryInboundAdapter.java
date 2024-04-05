@@ -6,7 +6,9 @@ import lombok.SneakyThrows;
 import lombok.extern.slf4j.Slf4j;
 import org.apache.pulsar.client.api.Message;
 import org.salgar.camunda.core.adapter.AbstractInboundAdapter;
+import org.salgar.camunda.core.util.SubProcessConstants;
 import org.salgar.camunda.core.util.ZeebeMessageConstants;
+import org.salgar.camunda.inventory.command.SourceProcess;
 import org.salgar.camunda.inventory.response.InventoryResponse;
 import org.salgar.camunda.inventory.response.ProductReservationRevertSuccessful;
 import org.salgar.camunda.inventory.response.ProductReserved;
@@ -45,6 +47,10 @@ public class InventoryInboundAdapter extends AbstractInboundAdapter implements I
                     variables
             );
         } else if(ResponseConstants.PRODUCT_RESERVATION_CANCELED.equals(message.getValue().getResponse())) {
+            SourceProcess sourceProcess = message
+                    .getValue()
+                    .getPayloadMap()
+                    .get(SubProcessConstants.SOURCE_PROCESS).unpack(SourceProcess.class);
             Map<String, Object> variables = new HashMap<>();
             ProductReservationRevertSuccessful productReservationRevertSuccessful = message
                     .getValue()
@@ -56,7 +62,7 @@ public class InventoryInboundAdapter extends AbstractInboundAdapter implements I
                     productReservationRevertSuccessful.getProductReservationRevertSuccessful());
             processZeebeMessage(
                     message.getKey(),
-                    ZeebeMessageConstants.PRODUCT_RESERVATION_REVERTED_MESSAGE,
+                    ZeebeMessageConstants.PRODUCT_RESERVATION_REVERTED_MESSAGE + sourceProcess.getSourceProcess(),
                     variables
             );
         } else {

@@ -27,14 +27,17 @@ public class RestAdapter implements RestPort {
         if (correlationId==null) {correlationId = "";}
 
         String response = exchange.getRequest().getQueryParams().getFirst("response");
-        if (response==null) {correlationId = "";}
+        if (response==null) {response = "";}
 
-        processInventoryResponse(correlationId, response);
+        String sourceProcess = exchange.getRequest().getQueryParams().getFirst("sourceProcess");
+        if (sourceProcess==null) {sourceProcess = "";}
+
+        processInventoryResponse(correlationId, response, sourceProcess);
     }
 
     @Override
-    public void processInventoryResponse(String correlationId, String response) {
-        String customerResponse = null;
+    public void processInventoryResponse(String correlationId, String response, String sourceProcess) {
+        String customerResponse;
         if("reserve".equals(response)) {
             customerResponse = ResponseConstants.PRODUCT_RESERVED;
             prepareInventoryCreated(correlationId, customerResponse);
@@ -42,7 +45,7 @@ public class RestAdapter implements RestPort {
             customerResponse = ResponseConstants.PRODUCT_RESERVED;
             prepareInventoryCreatedFailed(correlationId, customerResponse);
         } else if("revert".equals(response)) {
-            prepareInventoryReservationCanceled(correlationId);
+            prepareInventoryReservationCanceled(correlationId, sourceProcess);
         } else {
             log.info("Unknown response: [{}]", response);
         }
@@ -70,7 +73,7 @@ public class RestAdapter implements RestPort {
         inventoryOutboundAdapter.deliverInventoryResponse(correlationId, builder.build());
     }
 
-    private void prepareInventoryReservationCanceled(String correlationId) {
-        inventoryReservationFacade.revertProductReservation(correlationId);
+    private void prepareInventoryReservationCanceled(String correlationId, String sourceProcess) {
+        inventoryReservationFacade.revertProductReservation(correlationId, sourceProcess);
     }
 }

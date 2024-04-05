@@ -3,6 +3,7 @@ package org.salgar.camunda.customer.service.adapter;
 import com.google.protobuf.Any;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
+import org.salgar.camunda.customer.command.SourceProcess;
 import org.salgar.camunda.customer.model.protobuf.Customer;
 import org.salgar.camunda.customer.response.CustomerCreated;
 import org.salgar.camunda.customer.response.CustomerResponse;
@@ -17,7 +18,7 @@ import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.RestController;
 import org.springframework.web.server.ServerWebExchange;
 
-import static org.salgar.camunda.customer.util.PayloadVariableConstants.CUSTOMER_REVERTED_SUCCESSFUL;
+import static org.salgar.camunda.customer.util.SourceProcessConstants.SOURCE_PROCESS;
 
 @RestController
 @RequiredArgsConstructor
@@ -34,13 +35,16 @@ public class RestAdapter implements RestPort {
         if (correlationId==null) {correlationId = "";}
 
         String response = exchange.getRequest().getQueryParams().getFirst("response");
-        if (response==null) {correlationId = "";}
+        if (response==null) {response = "";}
 
-        processCustomerResponse(correlationId, response);
+        String sourceProcess = exchange.getRequest().getQueryParams().getFirst("sourceProcess");
+        if (sourceProcess==null) {sourceProcess = "";}
+
+        processCustomerResponse(correlationId, response, sourceProcess);
     }
 
     @Override
-    public void processCustomerResponse(String correlationId, String response) {
+    public void processCustomerResponse(String correlationId, String response, String sourceProcess) {
         String customerResponse;
         if("creating".equals(response)) {
             customerResponse = ResponseConstants.CUSTOMER_CREATED;
@@ -49,9 +53,9 @@ public class RestAdapter implements RestPort {
             customerResponse = ResponseConstants.CUSTOMER_FAILED;
             prepareCustomerFailed(correlationId, customerResponse);
         } else if("revert".equals(response)) {
-            prepareCustomerReverted(correlationId);
+            prepareCustomerReverted(correlationId, sourceProcess);
         } else if("revert_fail".equals(response)) {
-            prepareCustomerRevertFailed(correlationId);
+            prepareCustomerRevertFailed(correlationId, sourceProcess);
         }else {
             log.info("Unknown response: [{}]", response);
         }
@@ -59,16 +63,23 @@ public class RestAdapter implements RestPort {
 
     private void prepareCustomerCreated(String correlationId, String customerResponse) {
         Customer customer = customerMemory.retrieveCustomerByOrderId(correlationId);
+        if(customer == null) {
+            customer = Customer.newBuilder().build();
+        }
 
         CustomerResponse.Builder builder = CustomerResponse.newBuilder();
         builder
                 .setResponse(customerResponse)
                 .putPayload(
                         PayloadVariableConstants.CUSTOMER_CREATED,
-                        Any.pack(CustomerCreated.newBuilder().setCustomerCreated(true).build()))
+                        Any.pack(CustomerCreated.newBuilder().setCustomerCreated(true).build()));
+
+        builder
                 .putPayload(
-                        PayloadVariableConstants.CREATE_CUSTOMER_VARIABLE,
-                        Any.pack(customer));
+                PayloadVariableConstants.CREATE_CUSTOMER_VARIABLE,
+                Any.pack(customer));
+
+
 
         customerOutboundPort.deliverCustomerResponse(correlationId, builder.build());
     }
@@ -84,17 +95,20 @@ public class RestAdapter implements RestPort {
         customerOutboundPort.deliverCustomerResponse(correlationId, builder.build());
     }
 
-    private void prepareCustomerReverted(String correlationId) {
-        customerFacade.revertCustomer(correlationId);
+    private void prepareCustomerReverted(String correlationId, String sourceProcess) {
+        customerFacade.revertCustomer(correlationId, sourceProcess);
     }
 
-    private void prepareCustomerRevertFailed(String correlationId) {
+    private void prepareCustomerRevertFailed(String correlationId, String sourceProcess) {
         CustomerResponse.Builder builder = CustomerResponse.newBuilder();
         builder
                 .setResponse(ResponseConstants.CUSTOMER_REVERTED)
                 .putPayload(
                         PayloadVariableConstants.CUSTOMER_REVERTED_SUCCESSFUL,
-                        Any.pack(CustomerRevertSuccessful.newBuilder().setCustomerRevertSucessful(false).build()));
+                        Any.pack(CustomerRevertSuccessful.newBuilder().setCustomerRevertSucessful(false).build()))
+                .putPayload(
+                        SOURCE_PROCESS,
+                        Any.pack(SourceProcess.newBuilder().setSourceProcess(sourceProcess).build()));
 
 
         customerOutboundPort.deliverCustomerResponse(correlationId, builder.build());

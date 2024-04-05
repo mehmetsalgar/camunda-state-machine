@@ -7,7 +7,9 @@ import lombok.extern.slf4j.Slf4j;
 import org.apache.pulsar.client.api.Message;
 import org.salgar.camunda.core.adapter.AbstractInboundAdapter;
 import org.salgar.camunda.core.mapping.OrchestrationCustomer2Customer;
+import org.salgar.camunda.core.util.SubProcessConstants;
 import org.salgar.camunda.core.util.ZeebeMessageConstants;
+import org.salgar.camunda.customer.command.SourceProcess;
 import org.salgar.camunda.customer.model.protobuf.Customer;
 import org.salgar.camunda.customer.response.CustomerCreated;
 import org.salgar.camunda.customer.response.CustomerResponse;
@@ -78,6 +80,11 @@ public class CustomerInboundAdapter extends AbstractInboundAdapter implements Cu
                     ZeebeMessageConstants.CUSTOMER_CREATED_MESSAGE,
                     variables);
         } else if(ResponseConstants.CUSTOMER_REVERTED.equals(message.getValue().getResponse())) {
+            SourceProcess sourceProcess = message
+                    .getValue()
+                    .getPayloadMap()
+                    .get(SubProcessConstants.SOURCE_PROCESS).unpack(SourceProcess.class);
+
             Map<String, Object> variables = new HashMap<>();
 
             CustomerRevertSuccessful customerRevertSuccessful = message
@@ -92,7 +99,7 @@ public class CustomerInboundAdapter extends AbstractInboundAdapter implements Cu
 
             processZeebeMessage(
                     message.getKey(),
-                    ZeebeMessageConstants.CUSTOMER_REVERT_RESULT_MESSAGE,
+                    ZeebeMessageConstants.CUSTOMER_REVERT_RESULT_MESSAGE + sourceProcess.getSourceProcess(),
                     variables);
         }
         else {

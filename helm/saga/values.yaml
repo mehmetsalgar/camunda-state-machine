@@ -1,24 +1,24 @@
 customer-service:
   enabled: true
   image:
-    tag: "0.0.8-SNAPSHOT"
+    tag: "0.0.12-SNAPSHOT"
 inventory-service:
   enabled: true
   image:
-    tag: "0.0.4-SNAPSHOT"
+    tag: "0.0.5-SNAPSHOT"
 invoice-service:
   enabled: true
   image:
-    tag: "0.0.4-SNAPSHOT"
+    tag: "0.0.6-SNAPSHOT"
 orchestration:
   enabled: true
   image:
-    tag: "0.0.36-SNAPSHOT"
+    tag: "0.0.47-SNAPSHOT"
 order-service:
   enabled: true
   image:
-    tag: "0.0.7-SNAPSHOT"
+    tag: "0.0.8-SNAPSHOT"
 product-options-service:
   enabled: true
   image:
-    tag: "0.0.3-SNAPSHOT"
+    tag: "0.0.4-SNAPSHOT"

@@ -76,7 +76,7 @@ public class RestAdapter implements RestPort {
         log.info("Triggering process");
         ProcessInstanceEvent event = zeebeClient
                 .newCreateInstanceCommand()
-                .bpmnProcessId("create-order")
+                .bpmnProcessId("create-order-optimised")
                 .latestVersion()
                 .variables(variables)
                 .send().

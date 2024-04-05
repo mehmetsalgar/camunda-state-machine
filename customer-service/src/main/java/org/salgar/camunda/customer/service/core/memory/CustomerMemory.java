@@ -20,12 +20,12 @@ public class CustomerMemory {
         return memoryByOrderId.get(orderId);
     }
 
-    public Customer retrieveCustomerById(String orderId) {
-        return memoryByOrderId.get(orderId);
+    public Customer retrieveCustomerById(String customerId) {
+        return memory.get(customerId);
     }
 
-    public void removeCustomer(String orderId, Customer customer) {
-        memoryByOrderId.remove(orderId);
+    public void removeCustomer(String orderId) {
+        Customer customer =memoryByOrderId.remove(orderId);
         memory.remove(customer.getCustomerId());
     }
 }

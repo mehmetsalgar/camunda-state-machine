@@ -9,3 +9,7 @@ message CustomerCommand {
   string command = 1;
   map<string, google.protobuf.Any> payload = 2;
 }
+
+message SourceProcess {
+  string sourceProcess = 1;
+}

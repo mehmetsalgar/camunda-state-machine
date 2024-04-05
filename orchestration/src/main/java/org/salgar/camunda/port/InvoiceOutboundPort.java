@@ -13,5 +13,5 @@ public interface InvoiceOutboundPort {
             BankInformation bankInformation,
             List<OrderItem> orderItems);
 
-    void cancelInvoice(String correlationId);
+    void cancelInvoice(String correlationId, String sourceProcess);
 }

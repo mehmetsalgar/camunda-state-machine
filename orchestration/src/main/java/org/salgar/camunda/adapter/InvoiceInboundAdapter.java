@@ -5,7 +5,9 @@ import lombok.SneakyThrows;
 import lombok.extern.slf4j.Slf4j;
 import org.apache.pulsar.client.api.Message;
 import org.salgar.camunda.core.adapter.AbstractInboundAdapter;
+import org.salgar.camunda.core.util.SubProcessConstants;
 import org.salgar.camunda.core.util.ZeebeMessageConstants;
+import org.salgar.camunda.invoice.command.SourceProcess;
 import org.salgar.camunda.invoice.response.InvoiceCancellationSuccessful;
 import org.salgar.camunda.invoice.response.InvoiceCreated;
 import org.salgar.camunda.invoice.response.InvoiceResponse;
@@ -60,6 +62,10 @@ public class InvoiceInboundAdapter extends AbstractInboundAdapter implements Inv
                     ZeebeMessageConstants.INVOICE_CREATED_MESSAGE,
                     variables);
         } else if(ResponseConstants.INVOICE_CANCELED.equals(message.getValue().getResponse())) {
+            SourceProcess sourceProcess = message
+                    .getValue()
+                    .getPayloadMap()
+                    .get(SubProcessConstants.SOURCE_PROCESS).unpack(SourceProcess.class);
             Map<String, Object> variables = new HashMap<>();
             InvoiceCancellationSuccessful invoiceCancellationSuccessful = message
                     .getValue()
@@ -70,7 +76,7 @@ public class InvoiceInboundAdapter extends AbstractInboundAdapter implements Inv
                     invoiceCancellationSuccessful.getInvoiceCancelationSuccessful());
             processZeebeMessage(
                     message.getKey(),
-                    ZeebeMessageConstants.INVOICE_CANCELLATION_MESSAGE,
+                    ZeebeMessageConstants.INVOICE_CANCELLATION_MESSAGE + sourceProcess.getSourceProcess(),
                     variables);
         } else {
             log.info("Unknown command: [{}]", message.getValue().getResponse());

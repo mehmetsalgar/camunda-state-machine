@@ -8,6 +8,7 @@ import org.apache.pulsar.client.api.Producer;
 import org.salgar.camunda.core.mapping.OrchestrationCustomer2Customer;
 import org.salgar.camunda.core.model.Customer;
 import org.salgar.camunda.customer.command.CustomerCommand;
+import org.salgar.camunda.customer.command.SourceProcess;
 import org.salgar.camunda.customer.util.CommandConstants;
 import org.salgar.camunda.customer.util.PayloadVariableConstants;
 import org.salgar.camunda.port.CustomerOutboundPort;
@@ -16,6 +17,8 @@ import org.springframework.stereotype.Component;
 
 import java.time.LocalDateTime;
 import java.time.ZoneOffset;
+
+import static org.salgar.camunda.core.util.SubProcessConstants.SOURCE_PROCESS;
 
 @Component
 @RequiredArgsConstructor
@@ -53,7 +56,7 @@ public class CustomerOutboundAdapter implements CustomerOutboundPort {
 
     @Override
     @SneakyThrows
-    public void revertCustomerChanges(String correlationId) {
+    public void revertCustomerChanges(String correlationId, String sourceProcess) {
         log.info("Reverting Customer");
         log.info("Key: [{}]", correlationId);
 
@@ -64,12 +67,12 @@ public class CustomerOutboundAdapter implements CustomerOutboundPort {
         log.info("Creating Command");
         CustomerCommand.Builder builder = CustomerCommand.newBuilder();
         builder.setCommand(CommandConstants.REVERT_CUSTOMER);
+        builder.putPayload(
+                SOURCE_PROCESS,
+                Any.pack(SourceProcess.newBuilder().setSourceProcess(sourceProcess).build())
+        );
 
         CustomerCommand customerCommand = builder.build();
-
-        //builder.putPayload(
-        //        PayloadVariableConstants.CREATED_CUSTOMER_VARIABLE,
-        //        Any.pack(customerExternal));
 
         pulsarCustomerProducer
                 .newMessage()

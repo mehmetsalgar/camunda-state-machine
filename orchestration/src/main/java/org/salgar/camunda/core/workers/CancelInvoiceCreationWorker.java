@@ -10,6 +10,8 @@ import org.springframework.stereotype.Component;
 
 import java.util.Map;
 
+import static org.salgar.camunda.core.util.SubProcessConstants.SOURCE_PROCESS;
+
 @Component
 @RequiredArgsConstructor
 @Slf4j
@@ -21,7 +23,8 @@ public class CancelInvoiceCreationWorker {
         log.info("Cancel Invoice Creation");
         Map<String, Object> existingVariables = job.getVariablesAsMap();
         String orderId = (String) existingVariables.get(PayloadVariableConstants.ORDER_ID_VARIABLE);
+        String sourceProcess = (String) existingVariables.get(SOURCE_PROCESS);
 
-        invoiceOutboundPort.cancelInvoice(orderId);
+        invoiceOutboundPort.cancelInvoice(orderId, sourceProcess);
     }
 }

@@ -14,6 +14,8 @@ import org.salgar.camunda.inventory.util.PayloadVariableConstants;
 import org.springframework.pulsar.annotation.PulsarListener;
 import org.springframework.stereotype.Component;
 
+import static org.salgar.camunda.inventory.util.SourceProcessConstants.SOURCE_PROCESS;
+
 @Component
 @RequiredArgsConstructor
 @Slf4j
@@ -49,7 +51,8 @@ public class InventoryInboundAdapter implements InventoryInboundPort {
 
 //            inventoryReservationFacade.reserveProduct(orderId, orderItems);
         } else if(InventoryCommandConstants.REVERT_PRODUCT_RESERVATION.equals(command.getValue().getCommand())) {
-            log.info("Reverting Product Reservation");
+            String sourceProcess = String.valueOf(command.getValue().getPayloadMap().get(SOURCE_PROCESS));
+            log.info("Reverting Product Reservation for sourceProcess:[{}]", sourceProcess);
             String orderId = command.getKey();
 
             //inventoryReservationFacade.revertProductReservation(orderId);

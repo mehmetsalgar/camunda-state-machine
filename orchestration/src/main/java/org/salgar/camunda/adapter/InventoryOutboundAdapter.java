@@ -7,6 +7,8 @@ import lombok.extern.slf4j.Slf4j;
 import org.apache.pulsar.client.api.Producer;
 import org.salgar.camunda.core.mapping.OrchestrationInventory2Inventory;
 import org.salgar.camunda.core.model.OrderItem;
+import org.salgar.camunda.customer.util.SourceProcessConstants;
+import org.salgar.camunda.inventory.command.SourceProcess;
 import org.salgar.camunda.inventory.model.protobuf.OrderItems;
 import org.salgar.camunda.inventory.util.InventoryCommandConstants;
 import org.salgar.camunda.inventory.util.PayloadVariableConstants;
@@ -58,7 +60,7 @@ public class InventoryOutboundAdapter implements InventoryOutboundPort {
 
     @Override
     @SneakyThrows
-    public void revertProductReservation(String correlationId, List<OrderItem> orderItems) {
+    public void revertProductReservation(String correlationId, List<OrderItem> orderItems, String sourceProcess) {
         log.info("Reverting Product Reservation in Inventory: [{}]", orderItems);
         log.info("Key: [{}]", correlationId);
 
@@ -73,9 +75,11 @@ public class InventoryOutboundAdapter implements InventoryOutboundPort {
         InventoryCommand.Builder builder = InventoryCommand.newBuilder();
         builder.setCommand(InventoryCommandConstants.REVERT_PRODUCT_RESERVATION);
         builder.putPayload(
-                PayloadVariableConstants.ORDER_ITEMS,
-                Any.pack(orderItemsExternal)
-        );
+                        PayloadVariableConstants.ORDER_ITEMS,
+                        Any.pack(orderItemsExternal))
+                .putPayload(
+                        SourceProcessConstants.SOURCE_PROCESS,
+                        Any.pack(SourceProcess.newBuilder().setSourceProcess(sourceProcess).build()));
 
         pulsarInventoryProducer
                 .newMessage()

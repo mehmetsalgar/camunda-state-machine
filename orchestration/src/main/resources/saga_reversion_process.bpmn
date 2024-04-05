@@ -1,0 +1,337 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<bpmn:definitions xmlns:bpmn="http://www.omg.org/spec/BPMN/20100524/MODEL" xmlns:bpmndi="http://www.omg.org/spec/BPMN/20100524/DI" xmlns:dc="http://www.omg.org/spec/DD/20100524/DC" xmlns:zeebe="http://camunda.org/schema/zeebe/1.0" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xmlns:di="http://www.omg.org/spec/DD/20100524/DI" xmlns:modeler="http://camunda.org/schema/modeler/1.0" id="Definitions_0nufid9" targetNamespace="http://bpmn.io/schema/bpmn" exporter="Camunda Modeler" exporterVersion="5.21.0" modeler:executionPlatform="Camunda Cloud" modeler:executionPlatformVersion="8.4.0">
+  <bpmn:process id="rollback-process" name="ReversionProcess" isExecutable="true">
+    <bpmn:startEvent id="StartEvent_1">
+      <bpmn:outgoing>Flow_0ibrsos</bpmn:outgoing>
+    </bpmn:startEvent>
+    <bpmn:parallelGateway id="Gateway_1wn14p4">
+      <bpmn:incoming>Flow_0ibrsos</bpmn:incoming>
+      <bpmn:outgoing>Flow_0kufbr2</bpmn:outgoing>
+      <bpmn:outgoing>Flow_1n6zsn0</bpmn:outgoing>
+      <bpmn:outgoing>Flow_101l6o3</bpmn:outgoing>
+    </bpmn:parallelGateway>
+    <bpmn:sendTask id="RevertCustomerTask" name="Revert Customer">
+      <bpmn:extensionElements>
+        <zeebe:taskDefinition type="revertCustomer" />
+      </bpmn:extensionElements>
+      <bpmn:incoming>Flow_0kufbr2</bpmn:incoming>
+      <bpmn:outgoing>Flow_01xq9vs</bpmn:outgoing>
+    </bpmn:sendTask>
+    <bpmn:receiveTask id="CustomerRevertResultTask" name="Customer Revert Result" messageRef="Message_32f69vv">
+      <bpmn:incoming>Flow_01xq9vs</bpmn:incoming>
+      <bpmn:outgoing>Flow_0fgvfao</bpmn:outgoing>
+    </bpmn:receiveTask>
+    <bpmn:exclusiveGateway id="Gateway_030wy0y" name="Customer revert succesful">
+      <bpmn:incoming>Flow_0fgvfao</bpmn:incoming>
+      <bpmn:outgoing>Flow_1bmnskw</bpmn:outgoing>
+      <bpmn:outgoing>Flow_0i5xj2g</bpmn:outgoing>
+    </bpmn:exclusiveGateway>
+    <bpmn:userTask id="ProcessCustomerRevertErrorTask" name="Process Customer Revert Error">
+      <bpmn:incoming>Flow_1bmnskw</bpmn:incoming>
+      <bpmn:outgoing>Flow_0e6o005</bpmn:outgoing>
+    </bpmn:userTask>
+    <bpmn:sendTask id="RevertProductReservationTask" name="Revert Product Reservation">
+      <bpmn:extensionElements>
+        <zeebe:taskDefinition type="revertProductReservation" />
+      </bpmn:extensionElements>
+      <bpmn:incoming>Flow_1n6zsn0</bpmn:incoming>
+      <bpmn:outgoing>Flow_0pohhw5</bpmn:outgoing>
+    </bpmn:sendTask>
+    <bpmn:receiveTask id="Activity_0yym99y" name="Product Reservation Revert Result" messageRef="Message_3ll1i2l">
+      <bpmn:incoming>Flow_0pohhw5</bpmn:incoming>
+      <bpmn:outgoing>Flow_0jh5bdx</bpmn:outgoing>
+    </bpmn:receiveTask>
+    <bpmn:exclusiveGateway id="Gateway_0hugt9k" name="Product Reservation revert succesful">
+      <bpmn:incoming>Flow_0jh5bdx</bpmn:incoming>
+      <bpmn:outgoing>Flow_0i2pcmm</bpmn:outgoing>
+      <bpmn:outgoing>Flow_14pjs10</bpmn:outgoing>
+    </bpmn:exclusiveGateway>
+    <bpmn:userTask id="ProcessProductReservationRevertErrorTask" name="Process Product Reservation Revert Error">
+      <bpmn:incoming>Flow_14pjs10</bpmn:incoming>
+      <bpmn:outgoing>Flow_0fw2fnd</bpmn:outgoing>
+    </bpmn:userTask>
+    <bpmn:sendTask id="CancelInvoiceCreationTask" name="Cancel Invoice Creation">
+      <bpmn:extensionElements>
+        <zeebe:taskDefinition type="cancelInvoiceCreation" />
+      </bpmn:extensionElements>
+      <bpmn:incoming>Flow_101l6o3</bpmn:incoming>
+      <bpmn:outgoing>Flow_0dte716</bpmn:outgoing>
+    </bpmn:sendTask>
+    <bpmn:receiveTask id="InvoiceCancelationResultTask" name="Invoice Cancelation Result" messageRef="Message_3ei94up">
+      <bpmn:incoming>Flow_0dte716</bpmn:incoming>
+      <bpmn:outgoing>Flow_0zquvwr</bpmn:outgoing>
+    </bpmn:receiveTask>
+    <bpmn:exclusiveGateway id="Gateway_0oo11nu" name="Invoice Cancelation succesful">
+      <bpmn:incoming>Flow_0zquvwr</bpmn:incoming>
+      <bpmn:outgoing>Flow_0v20qmu</bpmn:outgoing>
+      <bpmn:outgoing>Flow_0h5emi2</bpmn:outgoing>
+    </bpmn:exclusiveGateway>
+    <bpmn:userTask id="ProcessInvoiceCancelationErrorTask" name="Process Invoice Cancelation Error">
+      <bpmn:incoming>Flow_0h5emi2</bpmn:incoming>
+      <bpmn:outgoing>Flow_10wrbar</bpmn:outgoing>
+    </bpmn:userTask>
+    <bpmn:sendTask id="NotifyInterestedCustomerProductAvailabilityTask" name="Notify Interested Customer for the availibility of Product">
+      <bpmn:extensionElements>
+        <zeebe:taskDefinition type="notifyInterestedCustomerProductAvailability" />
+      </bpmn:extensionElements>
+      <bpmn:incoming>Flow_0i2pcmm</bpmn:incoming>
+      <bpmn:outgoing>Flow_15ojryq</bpmn:outgoing>
+    </bpmn:sendTask>
+    <bpmn:endEvent id="ProcessCustomerReveetErrorEndEvent_04i1zlj">
+      <bpmn:incoming>Flow_0e6o005</bpmn:incoming>
+    </bpmn:endEvent>
+    <bpmn:endEvent id="ProcessProductReservationRevertErrorEndEvent">
+      <bpmn:incoming>Flow_0fw2fnd</bpmn:incoming>
+    </bpmn:endEvent>
+    <bpmn:endEvent id="InvoiceCancelationErrorEndEvent">
+      <bpmn:incoming>Flow_10wrbar</bpmn:incoming>
+    </bpmn:endEvent>
+    <bpmn:sequenceFlow id="Flow_0kufbr2" sourceRef="Gateway_1wn14p4" targetRef="RevertCustomerTask" />
+    <bpmn:sequenceFlow id="Flow_1n6zsn0" sourceRef="Gateway_1wn14p4" targetRef="RevertProductReservationTask" />
+    <bpmn:sequenceFlow id="Flow_101l6o3" sourceRef="Gateway_1wn14p4" targetRef="CancelInvoiceCreationTask" />
+    <bpmn:sequenceFlow id="Flow_01xq9vs" sourceRef="RevertCustomerTask" targetRef="CustomerRevertResultTask" />
+    <bpmn:sequenceFlow id="Flow_0fgvfao" sourceRef="CustomerRevertResultTask" targetRef="Gateway_030wy0y" />
+    <bpmn:sequenceFlow id="Flow_1bmnskw" name="no" sourceRef="Gateway_030wy0y" targetRef="ProcessCustomerRevertErrorTask">
+      <bpmn:conditionExpression xsi:type="bpmn:tFormalExpression">=customer_revert_sucessful=false</bpmn:conditionExpression>
+    </bpmn:sequenceFlow>
+    <bpmn:sequenceFlow id="Flow_0e6o005" sourceRef="ProcessCustomerRevertErrorTask" targetRef="ProcessCustomerReveetErrorEndEvent_04i1zlj" />
+    <bpmn:sequenceFlow id="Flow_0pohhw5" sourceRef="RevertProductReservationTask" targetRef="Activity_0yym99y" />
+    <bpmn:sequenceFlow id="Flow_0jh5bdx" sourceRef="Activity_0yym99y" targetRef="Gateway_0hugt9k" />
+    <bpmn:sequenceFlow id="Flow_0i2pcmm" name="yes" sourceRef="Gateway_0hugt9k" targetRef="NotifyInterestedCustomerProductAvailabilityTask">
+      <bpmn:conditionExpression xsi:type="bpmn:tFormalExpression">=product_reservation_revert_successful=true</bpmn:conditionExpression>
+    </bpmn:sequenceFlow>
+    <bpmn:sequenceFlow id="Flow_14pjs10" name="no" sourceRef="Gateway_0hugt9k" targetRef="ProcessProductReservationRevertErrorTask">
+      <bpmn:conditionExpression xsi:type="bpmn:tFormalExpression">=product_reservation_revert_successful=false</bpmn:conditionExpression>
+    </bpmn:sequenceFlow>
+    <bpmn:sequenceFlow id="Flow_15ojryq" sourceRef="NotifyInterestedCustomerProductAvailabilityTask" targetRef="Gateway_1e0e14i" />
+    <bpmn:sequenceFlow id="Flow_0fw2fnd" sourceRef="ProcessProductReservationRevertErrorTask" targetRef="ProcessProductReservationRevertErrorEndEvent" />
+    <bpmn:sequenceFlow id="Flow_0dte716" sourceRef="CancelInvoiceCreationTask" targetRef="InvoiceCancelationResultTask" />
+    <bpmn:sequenceFlow id="Flow_0zquvwr" sourceRef="InvoiceCancelationResultTask" targetRef="Gateway_0oo11nu" />
+    <bpmn:sequenceFlow id="Flow_0v20qmu" name="yes" sourceRef="Gateway_0oo11nu" targetRef="Gateway_1e0e14i">
+      <bpmn:conditionExpression xsi:type="bpmn:tFormalExpression">=invoice_cancelation_successful=true</bpmn:conditionExpression>
+    </bpmn:sequenceFlow>
+    <bpmn:sequenceFlow id="Flow_0h5emi2" name="no" sourceRef="Gateway_0oo11nu" targetRef="ProcessInvoiceCancelationErrorTask">
+      <bpmn:conditionExpression xsi:type="bpmn:tFormalExpression">=invoice_cancelation_successful=false</bpmn:conditionExpression>
+    </bpmn:sequenceFlow>
+    <bpmn:sequenceFlow id="Flow_10wrbar" sourceRef="ProcessInvoiceCancelationErrorTask" targetRef="InvoiceCancelationErrorEndEvent" />
+    <bpmn:sequenceFlow id="Flow_0ibrsos" sourceRef="StartEvent_1" targetRef="Gateway_1wn14p4" />
+    <bpmn:parallelGateway id="Gateway_1e0e14i">
+      <bpmn:incoming>Flow_0i5xj2g</bpmn:incoming>
+      <bpmn:incoming>Flow_15ojryq</bpmn:incoming>
+      <bpmn:incoming>Flow_0v20qmu</bpmn:incoming>
+      <bpmn:outgoing>Flow_1v5wlze</bpmn:outgoing>
+    </bpmn:parallelGateway>
+    <bpmn:sequenceFlow id="Flow_0i5xj2g" name="yes" sourceRef="Gateway_030wy0y" targetRef="Gateway_1e0e14i">
+      <bpmn:conditionExpression xsi:type="bpmn:tFormalExpression">=customer_revert_sucessful=true</bpmn:conditionExpression>
+    </bpmn:sequenceFlow>
+    <bpmn:endEvent id="Event_0hhpdz4">
+      <bpmn:incoming>Flow_1v5wlze</bpmn:incoming>
+    </bpmn:endEvent>
+    <bpmn:sequenceFlow id="Flow_1v5wlze" sourceRef="Gateway_1e0e14i" targetRef="Event_0hhpdz4" />
+  </bpmn:process>
+  <bpmn:message id="Message_32f69vv" name="=&#34;CustomerRevertResultMessage&#34; + sourceProcess">
+    <bpmn:extensionElements>
+      <zeebe:subscription correlationKey="=orderId" />
+    </bpmn:extensionElements>
+  </bpmn:message>
+  <bpmn:message id="Message_3ll1i2l" name="=&#34;ProductReservationRevertResultMessage&#34; + sourceProcess">
+    <bpmn:extensionElements>
+      <zeebe:subscription correlationKey="=orderId" />
+    </bpmn:extensionElements>
+  </bpmn:message>
+  <bpmn:message id="Message_3ei94up" name="=&#34;InvoiceCancelationResultMessage&#34; + sourceProcess">
+    <bpmn:extensionElements>
+      <zeebe:subscription correlationKey="=orderId" />
+    </bpmn:extensionElements>
+  </bpmn:message>
+  <bpmndi:BPMNDiagram id="BPMNDiagram_1">
+    <bpmndi:BPMNPlane id="BPMNPlane_1" bpmnElement="rollback-process">
+      <bpmndi:BPMNShape id="Gateway_1wn14p4_di" bpmnElement="Gateway_1wn14p4">
+        <dc:Bounds x="235" y="152" width="50" height="50" />
+      </bpmndi:BPMNShape>
+      <bpmndi:BPMNShape id="Activity_101j5wn_di" bpmnElement="RevertCustomerTask">
+        <dc:Bounds x="320" y="137" width="100" height="80" />
+      </bpmndi:BPMNShape>
+      <bpmndi:BPMNShape id="Activity_0a8n2e5_di" bpmnElement="CustomerRevertResultTask">
+        <dc:Bounds x="460" y="137" width="100" height="80" />
+      </bpmndi:BPMNShape>
+      <bpmndi:BPMNShape id="Gateway_030wy0y_di" bpmnElement="Gateway_030wy0y" isMarkerVisible="true">
+        <dc:Bounds x="615" y="152" width="50" height="50" />
+        <bpmndi:BPMNLabel>
+          <dc:Bounds x="601" y="115" width="79" height="27" />
+        </bpmndi:BPMNLabel>
+      </bpmndi:BPMNShape>
+      <bpmndi:BPMNShape id="Activity_171peg4_di" bpmnElement="ProcessCustomerRevertErrorTask">
+        <dc:Bounds x="720" y="207" width="100" height="80" />
+        <bpmndi:BPMNLabel />
+      </bpmndi:BPMNShape>
+      <bpmndi:BPMNShape id="Activity_052fiew_di" bpmnElement="RevertProductReservationTask">
+        <dc:Bounds x="320" y="327" width="100" height="80" />
+        <bpmndi:BPMNLabel />
+      </bpmndi:BPMNShape>
+      <bpmndi:BPMNShape id="Activity_0douges_di" bpmnElement="Activity_0yym99y">
+        <dc:Bounds x="460" y="327" width="100" height="80" />
+        <bpmndi:BPMNLabel />
+      </bpmndi:BPMNShape>
+      <bpmndi:BPMNShape id="Gateway_0hugt9k_di" bpmnElement="Gateway_0hugt9k" isMarkerVisible="true">
+        <dc:Bounds x="615" y="342" width="50" height="50" />
+        <bpmndi:BPMNLabel>
+          <dc:Bounds x="604" y="312" width="90" height="40" />
+        </bpmndi:BPMNLabel>
+      </bpmndi:BPMNShape>
+      <bpmndi:BPMNShape id="Activity_1l0eabx_di" bpmnElement="ProcessProductReservationRevertErrorTask">
+        <dc:Bounds x="720" y="427" width="100" height="80" />
+        <bpmndi:BPMNLabel />
+      </bpmndi:BPMNShape>
+      <bpmndi:BPMNShape id="Activity_0csl653_di" bpmnElement="CancelInvoiceCreationTask">
+        <dc:Bounds x="320" y="527" width="100" height="80" />
+        <bpmndi:BPMNLabel />
+      </bpmndi:BPMNShape>
+      <bpmndi:BPMNShape id="Activity_0gqiqim_di" bpmnElement="InvoiceCancelationResultTask">
+        <dc:Bounds x="460" y="527" width="100" height="80" />
+        <bpmndi:BPMNLabel />
+      </bpmndi:BPMNShape>
+      <bpmndi:BPMNShape id="Gateway_0oo11nu_di" bpmnElement="Gateway_0oo11nu" isMarkerVisible="true">
+        <dc:Bounds x="615" y="542" width="50" height="50" />
+        <bpmndi:BPMNLabel>
+          <dc:Bounds x="615" y="599" width="59" height="40" />
+        </bpmndi:BPMNLabel>
+      </bpmndi:BPMNShape>
+      <bpmndi:BPMNShape id="Activity_1j8tghc_di" bpmnElement="ProcessInvoiceCancelationErrorTask">
+        <dc:Bounds x="720" y="607" width="100" height="80" />
+        <bpmndi:BPMNLabel />
+      </bpmndi:BPMNShape>
+      <bpmndi:BPMNShape id="Activity_0u0hw3j_di" bpmnElement="NotifyInterestedCustomerProductAvailabilityTask">
+        <dc:Bounds x="720" y="327" width="100" height="80" />
+        <bpmndi:BPMNLabel />
+      </bpmndi:BPMNShape>
+      <bpmndi:BPMNShape id="Event_197i5um_di" bpmnElement="ProcessCustomerReveetErrorEndEvent_04i1zlj">
+        <dc:Bounds x="882" y="229" width="36" height="36" />
+      </bpmndi:BPMNShape>
+      <bpmndi:BPMNShape id="Event_0xrz7f2_di" bpmnElement="ProcessProductReservationRevertErrorEndEvent">
+        <dc:Bounds x="882" y="449" width="36" height="36" />
+      </bpmndi:BPMNShape>
+      <bpmndi:BPMNShape id="Event_080bkj3_di" bpmnElement="InvoiceCancelationErrorEndEvent">
+        <dc:Bounds x="882" y="629" width="36" height="36" />
+      </bpmndi:BPMNShape>
+      <bpmndi:BPMNShape id="Gateway_1e0e14i_di" bpmnElement="Gateway_1e0e14i">
+        <dc:Bounds x="955" y="152" width="50" height="50" />
+      </bpmndi:BPMNShape>
+      <bpmndi:BPMNShape id="Event_0hhpdz4_di" bpmnElement="Event_0hhpdz4">
+        <dc:Bounds x="1032" y="159" width="36" height="36" />
+      </bpmndi:BPMNShape>
+      <bpmndi:BPMNShape id="_BPMNShape_StartEvent_2" bpmnElement="StartEvent_1">
+        <dc:Bounds x="152" y="159" width="36" height="36" />
+      </bpmndi:BPMNShape>
+      <bpmndi:BPMNEdge id="Flow_0kufbr2_di" bpmnElement="Flow_0kufbr2">
+        <di:waypoint x="285" y="177" />
+        <di:waypoint x="320" y="177" />
+      </bpmndi:BPMNEdge>
+      <bpmndi:BPMNEdge id="Flow_1n6zsn0_di" bpmnElement="Flow_1n6zsn0">
+        <di:waypoint x="260" y="202" />
+        <di:waypoint x="260" y="367" />
+        <di:waypoint x="320" y="367" />
+      </bpmndi:BPMNEdge>
+      <bpmndi:BPMNEdge id="Flow_101l6o3_di" bpmnElement="Flow_101l6o3">
+        <di:waypoint x="260" y="202" />
+        <di:waypoint x="260" y="567" />
+        <di:waypoint x="320" y="567" />
+      </bpmndi:BPMNEdge>
+      <bpmndi:BPMNEdge id="Flow_01xq9vs_di" bpmnElement="Flow_01xq9vs">
+        <di:waypoint x="420" y="177" />
+        <di:waypoint x="460" y="177" />
+      </bpmndi:BPMNEdge>
+      <bpmndi:BPMNEdge id="Flow_0fgvfao_di" bpmnElement="Flow_0fgvfao">
+        <di:waypoint x="560" y="177" />
+        <di:waypoint x="615" y="177" />
+      </bpmndi:BPMNEdge>
+      <bpmndi:BPMNEdge id="Flow_0i5xj2g_di" bpmnElement="Flow_0i5xj2g">
+        <di:waypoint x="665" y="177" />
+        <di:waypoint x="955" y="177" />
+        <bpmndi:BPMNLabel>
+          <dc:Bounds x="803" y="159" width="18" height="14" />
+        </bpmndi:BPMNLabel>
+      </bpmndi:BPMNEdge>
+      <bpmndi:BPMNEdge id="Flow_1bmnskw_di" bpmnElement="Flow_1bmnskw">
+        <di:waypoint x="640" y="202" />
+        <di:waypoint x="640" y="247" />
+        <di:waypoint x="720" y="247" />
+        <bpmndi:BPMNLabel>
+          <dc:Bounds x="649" y="221" width="13" height="14" />
+        </bpmndi:BPMNLabel>
+      </bpmndi:BPMNEdge>
+      <bpmndi:BPMNEdge id="Flow_0e6o005_di" bpmnElement="Flow_0e6o005">
+        <di:waypoint x="820" y="247" />
+        <di:waypoint x="882" y="247" />
+      </bpmndi:BPMNEdge>
+      <bpmndi:BPMNEdge id="Flow_0pohhw5_di" bpmnElement="Flow_0pohhw5">
+        <di:waypoint x="420" y="367" />
+        <di:waypoint x="460" y="367" />
+      </bpmndi:BPMNEdge>
+      <bpmndi:BPMNEdge id="Flow_0jh5bdx_di" bpmnElement="Flow_0jh5bdx">
+        <di:waypoint x="560" y="367" />
+        <di:waypoint x="615" y="367" />
+      </bpmndi:BPMNEdge>
+      <bpmndi:BPMNEdge id="Flow_0i2pcmm_di" bpmnElement="Flow_0i2pcmm">
+        <di:waypoint x="665" y="367" />
+        <di:waypoint x="720" y="367" />
+        <bpmndi:BPMNLabel>
+          <dc:Bounds x="684" y="349" width="18" height="14" />
+        </bpmndi:BPMNLabel>
+      </bpmndi:BPMNEdge>
+      <bpmndi:BPMNEdge id="Flow_14pjs10_di" bpmnElement="Flow_14pjs10">
+        <di:waypoint x="640" y="392" />
+        <di:waypoint x="640" y="467" />
+        <di:waypoint x="720" y="467" />
+        <bpmndi:BPMNLabel>
+          <dc:Bounds x="649" y="427" width="13" height="14" />
+        </bpmndi:BPMNLabel>
+      </bpmndi:BPMNEdge>
+      <bpmndi:BPMNEdge id="Flow_15ojryq_di" bpmnElement="Flow_15ojryq">
+        <di:waypoint x="820" y="367" />
+        <di:waypoint x="980" y="367" />
+        <di:waypoint x="980" y="202" />
+      </bpmndi:BPMNEdge>
+      <bpmndi:BPMNEdge id="Flow_0fw2fnd_di" bpmnElement="Flow_0fw2fnd">
+        <di:waypoint x="820" y="467" />
+        <di:waypoint x="882" y="467" />
+      </bpmndi:BPMNEdge>
+      <bpmndi:BPMNEdge id="Flow_0dte716_di" bpmnElement="Flow_0dte716">
+        <di:waypoint x="420" y="567" />
+        <di:waypoint x="460" y="567" />
+      </bpmndi:BPMNEdge>
+      <bpmndi:BPMNEdge id="Flow_0zquvwr_di" bpmnElement="Flow_0zquvwr">
+        <di:waypoint x="560" y="567" />
+        <di:waypoint x="615" y="567" />
+      </bpmndi:BPMNEdge>
+      <bpmndi:BPMNEdge id="Flow_0v20qmu_di" bpmnElement="Flow_0v20qmu">
+        <di:waypoint x="665" y="567" />
+        <di:waypoint x="980" y="567" />
+        <di:waypoint x="980" y="202" />
+        <bpmndi:BPMNLabel>
+          <dc:Bounds x="831" y="349" width="18" height="14" />
+        </bpmndi:BPMNLabel>
+      </bpmndi:BPMNEdge>
+      <bpmndi:BPMNEdge id="Flow_0h5emi2_di" bpmnElement="Flow_0h5emi2">
+        <di:waypoint x="640" y="592" />
+        <di:waypoint x="640" y="647" />
+        <di:waypoint x="720" y="647" />
+        <bpmndi:BPMNLabel>
+          <dc:Bounds x="649" y="615" width="13" height="14" />
+        </bpmndi:BPMNLabel>
+      </bpmndi:BPMNEdge>
+      <bpmndi:BPMNEdge id="Flow_10wrbar_di" bpmnElement="Flow_10wrbar">
+        <di:waypoint x="820" y="647" />
+        <di:waypoint x="882" y="647" />
+      </bpmndi:BPMNEdge>
+      <bpmndi:BPMNEdge id="Flow_0ibrsos_di" bpmnElement="Flow_0ibrsos">
+        <di:waypoint x="188" y="177" />
+        <di:waypoint x="235" y="177" />
+      </bpmndi:BPMNEdge>
+      <bpmndi:BPMNEdge id="Flow_1v5wlze_di" bpmnElement="Flow_1v5wlze">
+        <di:waypoint x="1005" y="177" />
+        <di:waypoint x="1032" y="177" />
+      </bpmndi:BPMNEdge>
+    </bpmndi:BPMNPlane>
+  </bpmndi:BPMNDiagram>
+</bpmn:definitions>

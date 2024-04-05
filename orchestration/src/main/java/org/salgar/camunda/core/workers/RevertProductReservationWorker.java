@@ -13,6 +13,8 @@ import org.springframework.stereotype.Component;
 
 import java.util.Map;
 
+import static org.salgar.camunda.core.util.SubProcessConstants.SOURCE_PROCESS;
+
 @Component
 @RequiredArgsConstructor
 @Slf4j
@@ -27,10 +29,11 @@ public class RevertProductReservationWorker {
 
         Map<String, Object> existingVariables = job.getVariablesAsMap();
         String orderId = (String) existingVariables.get(PayloadVariableConstants.ORDER_ID_VARIABLE);
+        String sourceProcess = (String) existingVariables.get(SOURCE_PROCESS);
 
         String json = (String) existingVariables.get("order");
         Order order = objectMapper.readValue(json, Order.class);
 
-        inventoryOutboundPort.revertProductReservation(orderId, order.getOrderItems());
+        inventoryOutboundPort.revertProductReservation(orderId, order.getOrderItems(),  sourceProcess);
     }
 }

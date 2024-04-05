@@ -1,1 +1,1 @@
-POST http://localhost:60001/customer/response?correlationId=b78ff7e4-91dc-4cce-8208-6042f041bcb5&response=revert
+POST http://localhost:60001/customer/response?correlationId=4da05549-e1d9-4ce8-92c2-cfb7a99a8f37&response=revert&sourceProcess=inventory

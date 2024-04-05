@@ -1,1 +1,1 @@
-POST http://localhost:60004/invoice/response?correlationId=ace3cd44-a5ca-4494-9a38-909f5406f592&response=cancel
+POST http://localhost:60004/invoice/response?correlationId=4da05549-e1d9-4ce8-92c2-cfb7a99a8f37&response=cancel&sourceProcess=inventory

@@ -1,1 +1,1 @@
-POST http://localhost:60003/inventory/response?correlationId=ace3cd44-a5ca-4494-9a38-909f5406f592&response=reserve
+POST http://localhost:60003/inventory/response?correlationId=a82134c4-cd77-4260-9658-22e29ce1ea45&response=reserve

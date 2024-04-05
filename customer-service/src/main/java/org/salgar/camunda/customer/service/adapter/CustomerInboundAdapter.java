@@ -2,13 +2,12 @@ package org.salgar.camunda.customer.service.adapter;
 
 import com.google.protobuf.InvalidProtocolBufferException;
 import lombok.RequiredArgsConstructor;
-import lombok.SneakyThrows;
 import lombok.extern.slf4j.Slf4j;
 import org.apache.pulsar.client.api.Message;
 import org.salgar.camunda.customer.command.CustomerCommand;
+import org.salgar.camunda.customer.command.SourceProcess;
 import org.salgar.camunda.customer.model.protobuf.Customer;
 import org.salgar.camunda.customer.service.core.memory.CustomerMemory;
-import org.salgar.camunda.customer.service.facades.CustomerFacade;
 import org.salgar.camunda.customer.service.port.CustomerInboundPort;
 import org.salgar.camunda.customer.util.PayloadVariableConstants;
 import org.springframework.pulsar.annotation.PulsarListener;
@@ -18,6 +17,7 @@ import java.util.UUID;
 
 import static org.salgar.camunda.customer.util.CommandConstants.CREATE_CUSTOMER;
 import static org.salgar.camunda.customer.util.CommandConstants.REVERT_CUSTOMER;
+import static org.salgar.camunda.customer.util.SourceProcessConstants.SOURCE_PROCESS;
 
 @Component
 @RequiredArgsConstructor
@@ -63,8 +63,13 @@ public class CustomerInboundAdapter implements CustomerInboundPort {
                     .build();
             customerMemory.persistCustomer(orderID, customerCreated);
         } else if(REVERT_CUSTOMER.equals(command.getValue().getCommand())) {
-            log.info("Reverting Customer");
+            SourceProcess sourceProcess = command
+                    .getValue()
+                    .getPayloadMap()
+                    .get(SOURCE_PROCESS)
+                    .unpack(SourceProcess.class);
 
+            log.info("Reverting Customer for sourceProcess:[{}]", sourceProcess);
             //String orderId = command.getKey();
             //customerFacade.revertCustomer(orderId);
         } else {

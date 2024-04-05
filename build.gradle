@@ -105,7 +105,7 @@ project('customer-service') {
     apply plugin: 'java-library'
     apply plugin: 'com.google.cloud.tools.jib'
 
-    version = '0.0.8-SNAPSHOT'
+    version = '0.0.12-SNAPSHOT'
 
     dependencies {
         implementation project(':customer-api')
@@ -187,7 +187,7 @@ project('inventory-service') {
     apply plugin: 'java-library'
     apply plugin: 'com.google.cloud.tools.jib'
 
-    version = '0.0.4-SNAPSHOT'
+    version = '0.0.5-SNAPSHOT'
 
     dependencies {
         implementation project(':inventory-api')
@@ -269,7 +269,7 @@ project('invoice-service') {
     apply plugin: 'java-library'
     apply plugin: 'com.google.cloud.tools.jib'
 
-    version = '0.0.4-SNAPSHOT'
+    version = '0.0.6-SNAPSHOT'
 
     dependencies {
         implementation project(':invoice-api')
@@ -317,7 +317,7 @@ project(':orchestration') {
     apply plugin: 'java-library'
     apply plugin: 'com.google.cloud.tools.jib'
 
-    version = '0.0.36-SNAPSHOT'
+    version = '0.0.47-SNAPSHOT'
 
     dependencies {
         implementation project(':order-api'),
@@ -419,7 +419,7 @@ project('order-service') {
     apply plugin: 'java-library'
     apply plugin: 'com.google.cloud.tools.jib'
 
-    version = '0.0.7-SNAPSHOT'
+    version = '0.0.8-SNAPSHOT'
 
     dependencies {
         implementation project(':order-api')
@@ -501,7 +501,7 @@ project('product-options-service') {
     apply plugin: 'java-library'
     apply plugin: 'com.google.cloud.tools.jib'
 
-    version = '0.0.3-SNAPSHOT'
+    version = '0.0.4-SNAPSHOT'
 
     dependencies {
         implementation project(':product-options-api')

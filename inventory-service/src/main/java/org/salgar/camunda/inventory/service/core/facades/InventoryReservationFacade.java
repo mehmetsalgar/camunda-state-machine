@@ -2,6 +2,7 @@ package org.salgar.camunda.inventory.service.core.facades;
 
 import com.google.protobuf.Any;
 import lombok.RequiredArgsConstructor;
+import org.salgar.camunda.inventory.command.SourceProcess;
 import org.salgar.camunda.inventory.model.protobuf.OrderItem;
 import org.salgar.camunda.inventory.model.protobuf.OrderItems;
 import org.salgar.camunda.inventory.response.InventoryResponse;
@@ -13,6 +14,7 @@ import org.salgar.camunda.inventory.service.core.model.ReservedProduct;
 import org.salgar.camunda.inventory.service.core.persistence.InventoryMemory;
 import org.salgar.camunda.inventory.service.port.InventoryOutboundPort;
 import org.salgar.camunda.inventory.util.PayloadVariableConstants;
+import org.salgar.camunda.inventory.util.SourceProcessConstants;
 import org.springframework.stereotype.Component;
 
 import java.util.ArrayList;
@@ -46,20 +48,24 @@ public class InventoryReservationFacade {
         inventoryMemory.reserveProduct(orderId, orderReservation);
     }
 
-    public void revertProductReservation(String orderId) {
+    public void revertProductReservation(String orderId, String sourceProcess) {
         inventoryMemory.revertReservation(orderId);
 
         InventoryResponse.Builder builder = InventoryResponse.newBuilder();
         builder.setResponse(PRODUCT_RESERVATION_CANCELED);
         builder.putPayload(
-                PayloadVariableConstants.PRODUCT_RESERVATION_REVERT_SUCCESSFUL,
-                Any.pack(
+                    PayloadVariableConstants.PRODUCT_RESERVATION_REVERT_SUCCESSFUL,
+                    Any.pack(
                         ProductReservationRevertSuccessful
                                 .newBuilder()
                                 .setProductReservationRevertSuccessful(true)
                                 .build()
+                    )
                 )
-        );
+                .putPayload(
+                        SourceProcessConstants.SOURCE_PROCESS,
+                        Any.pack(SourceProcess.newBuilder().setSourceProcess(sourceProcess).build())
+                );
 
         inventoryOutboundPort.deliverInventoryResponse(orderId, builder.build());
     }
